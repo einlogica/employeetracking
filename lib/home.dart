@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:employer/database_helper.dart';
 import 'package:employer/main.dart';
@@ -29,12 +30,21 @@ class _CheckInPageState extends State<CheckInPage> {
 @override
 void initState() {
   super.initState();
-  _startService();
-  _loadCheckIns();
-
-  _uiRefreshTimer = Timer.periodic(Duration(minutes: 5), (_) {
+  // _startService();
+  // _loadCheckIns();
+  _checkPermissions();
+  //
+  _uiRefreshTimer = Timer.periodic(Duration(seconds: 10), (_) {
     _loadCheckIns();
   });
+}
+
+void _checkPermissions()async{
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied ||
+      permission == LocationPermission.deniedForever) {
+    permission = await Geolocator.requestPermission();
+  }
 }
 
 
@@ -42,40 +52,6 @@ void initState() {
   void dispose() {
     _uiRefreshTimer?.cancel();
     super.dispose();
-  }
-
-  Future<void> _checkIn() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Location permission denied')));
-        return;
-      }
-
-      final position = await Geolocator.getCurrentPosition();
-      final batteryLevel = await _battery.batteryLevel;
-      final now = DateTime.now();
-
-      await DBHelper.insertCheckIn({
-        'datetime': now.toIso8601String(),
-        'battery': batteryLevel,
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-      });
-      print(batteryLevel);
-      print("Check-In successful: $now");
-    } catch (e) {
-      print("Check-In failed: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Check-In failed')));
-    }
   }
 
   Future<void> _loadCheckIns() async {
@@ -108,22 +84,14 @@ void initState() {
 
   void _startService() async {
     final service = FlutterBackgroundService();
-
-    await service.configure(
-      androidConfiguration: AndroidConfiguration(
-        onStart: onStart,
-        isForegroundMode: true,
-        autoStart: true,
-        foregroundServiceNotificationId: 888,
-      ),
-      iosConfiguration: IosConfiguration(),
-    );
-
     service.startService();
   }
 
+
+
   Future<void> _stopAutoCheckIn() async {
     final service = FlutterBackgroundService();
+
     service.invoke("stopService");
     ScaffoldMessenger.of(
       context,
@@ -144,8 +112,7 @@ void initState() {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    await _checkIn(); 
-                    await _loadCheckIns(); 
+                    _startService();
                   },
 
                   child: Text('Check In', style: TextStyle(fontSize: 20)),
@@ -155,6 +122,15 @@ void initState() {
                     await _stopAutoCheckIn();
                   },
                   child: Text("Check-Out", style: TextStyle(fontSize: 20)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await DBHelper.deleteCheckIn();
+                    setState(() {
+
+                    });
+                  },
+                  child: Icon(Icons.clear),
                 ),
               ],
             ),

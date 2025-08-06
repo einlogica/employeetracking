@@ -36,6 +36,11 @@ class DBHelper {
     await db.insert('checkins', data);
   }
 
+  static Future<void> deleteCheckIn() async {
+    final db = await database;
+    await db.delete('checkins');
+  }
+
   static Future<List<Map<String, dynamic>>> getAllCheckIns() async {
     final db = await database;
     return await db.query('checkins', orderBy: 'id DESC');

@@ -8,34 +8,43 @@ import 'package:employer/database_helper.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:battery_plus/battery_plus.dart';
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeService();
-  runApp(CheckInPage());
+  runApp(MaterialApp(home: CheckInPage(),));
 }
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
-
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
       isForegroundMode: true,
-      autoStart: true,
+      autoStart: false,
       foregroundServiceNotificationId: 888,
-     
+
     ),
     iosConfiguration: IosConfiguration(), // iOS not supported well
   );
 
-  await service.startService();
+  // await service.startService();
 }
 
+@pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
+
+  print("Executing Background Service");
   DartPluginRegistrant.ensureInitialized();
   final battery = Battery();
 
-  Timer.periodic(const Duration(minutes: 15), (timer) async {
+  service.on('stopService').listen((event) {
+    service.stopSelf();
+  });
+
+
+  Timer.periodic(const Duration(seconds: 10), (timer) async {
     if (service is AndroidServiceInstance) {
       if (!(await service.isForegroundService())) {
         return;
