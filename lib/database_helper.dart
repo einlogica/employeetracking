@@ -24,7 +24,26 @@ class DBHelper {
             datetime TEXT,
             battery INTEGER,
             latitude REAL,
-            longitude REAL
+            longitude REAL,
+            distance REAL,
+            speed REAL,
+            status INTEGER
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE route(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            start_time TEXT,
+            end_time TEXT,
+            battery INTEGER,
+            start_latitude REAL,
+            start_longitude REAL,
+            end_latitude REAL,
+            end_longitude REAL,
+            distance REAL,
+            speed REAL,
+            status INTEGER
           )
         ''');
       },

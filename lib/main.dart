@@ -38,10 +38,15 @@ void onStart(ServiceInstance service) async {
   print("Executing Background Service");
   DartPluginRegistrant.ensureInitialized();
   final battery = Battery();
+  Position? _lastPosition;
+  bool start =true;
+  DateTime _lastDateTime = DateTime.now();
 
   service.on('stopService').listen((event) {
     service.stopSelf();
   });
+
+
 
 
   Timer.periodic(const Duration(seconds: 10), (timer) async {
@@ -58,18 +63,47 @@ void onStart(ServiceInstance service) async {
         permission = await Geolocator.requestPermission();
       }
 
+
+
       final position = await Geolocator.getCurrentPosition();
-      final batteryLevel = await battery.batteryLevel;
       final now = DateTime.now();
 
-      await DBHelper.insertCheckIn({
-        'datetime': now.toIso8601String(),
-        'battery': batteryLevel,
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-      });
 
-      print("✅ Auto Check-In stored: $now");
+      if (_lastPosition != null) {
+        double distance = Geolocator.distanceBetween(
+          _lastPosition!.latitude,
+          _lastPosition!.longitude,
+          position.latitude,
+          position.longitude,
+        );
+
+        if (distance > 30 || start || now.difference(_lastDateTime)>Duration(minutes: 15)) {
+          final batteryLevel = await battery.batteryLevel;
+          _lastPosition = position;
+          _lastDateTime = now;
+          await DBHelper.insertCheckIn({
+            'datetime': now.toIso8601String(),
+            'battery': batteryLevel,
+            'latitude': position.latitude,
+            'longitude': position.longitude,
+            'distance': distance,
+            'speed': position.speed*3.6,
+            'status':0
+          });
+
+
+          print("✅ Auto Check-In stored: $now");
+          start=false;
+        }
+        else{
+          print("🛑 Skipped: moved only ${distance.toStringAsFixed(1)} meters");
+          return; // don't save
+        }
+      }
+
+
+
+
     } catch (e) {
       print("❌ Background Check-In Error: $e");
     }

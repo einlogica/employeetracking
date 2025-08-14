@@ -135,17 +135,17 @@ void _checkPermissions()async{
               ],
             ),
             SizedBox(height: 30),
-            Text(_dateText, style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-            Text(_timeText, style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-            Text(_batteryText, style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-            Text(
-              _locationText,
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
+            // Text(_dateText, style: TextStyle(fontSize: 16)),
+            // SizedBox(height: 10),
+            // Text(_timeText, style: TextStyle(fontSize: 16)),
+            // SizedBox(height: 10),
+            // Text(_batteryText, style: TextStyle(fontSize: 16)),
+            // SizedBox(height: 10),
+            // Text(
+            //   _locationText,
+            //   style: TextStyle(fontSize: 16),
+            //   textAlign: TextAlign.center,
+            // ),
             Divider(),
             Expanded(
               child: _checkIns.isEmpty
@@ -160,7 +160,7 @@ void _checkPermissions()async{
                             "Lat: ${item['latitude']}, Lng: ${item['longitude']}",
                           ),
                           subtitle: Text(
-                            "Time: ${item['datetime']}\nBattery: ${item['battery']}%",
+                            "Time: ${item['datetime']}\nBattery: ${item['battery']}%\nSpeed: ${item['speed']}",
                           ),
                         );
                       },
