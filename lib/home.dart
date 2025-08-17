@@ -1,10 +1,8 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, unused_field
 
 import 'dart:async';
-import 'dart:ui';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:employer/database_helper.dart';
-import 'package:employer/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,26 +25,25 @@ class _CheckInPageState extends State<CheckInPage> {
   List<Map<String, dynamic>> _checkIns = [];
 
   Timer? _uiRefreshTimer;
-@override
-void initState() {
-  super.initState();
-  // _startService();
-  // _loadCheckIns();
-  _checkPermissions();
-  //
-  _uiRefreshTimer = Timer.periodic(Duration(seconds: 10), (_) {
-    _loadCheckIns();
-  });
-}
-
-void _checkPermissions()async{
-  LocationPermission permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied ||
-      permission == LocationPermission.deniedForever) {
-    permission = await Geolocator.requestPermission();
+  @override
+  void initState() {
+    super.initState();
+    // _startService();
+    // _loadCheckIns();
+    _checkPermissions();
+    //
+    _uiRefreshTimer = Timer.periodic(Duration(minutes: 1), (_) {
+      _loadCheckIns();
+    });
   }
-}
 
+  void _checkPermissions() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+    }
+  }
 
   @override
   void dispose() {
@@ -87,8 +84,6 @@ void _checkPermissions()async{
     service.startService();
   }
 
-
-
   Future<void> _stopAutoCheckIn() async {
     final service = FlutterBackgroundService();
 
@@ -107,32 +102,33 @@ void _checkPermissions()async{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    _startService();
-                  },
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      _startService();
+                    },
 
-                  child: Text('Check In', style: TextStyle(fontSize: 20)),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await _stopAutoCheckIn();
-                  },
-                  child: Text("Check-Out", style: TextStyle(fontSize: 20)),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await DBHelper.deleteCheckIn();
-                    setState(() {
-
-                    });
-                  },
-                  child: Icon(Icons.clear),
-                ),
-              ],
+                    child: Text('Check In', style: TextStyle(fontSize: 20)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _stopAutoCheckIn();
+                    },
+                    child: Text("Check-Out", style: TextStyle(fontSize: 20)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await DBHelper.deleteCheckIn();
+                      setState(() {});
+                    },
+                    child: Icon(Icons.clear),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 30),
             // Text(_dateText, style: TextStyle(fontSize: 16)),
@@ -148,23 +144,24 @@ void _checkPermissions()async{
             // ),
             Divider(),
             Expanded(
-              child: _checkIns.isEmpty
-                  ? Center(child: Text("No check-in data yet."))
-                  : ListView.builder(
-                      itemCount: _checkIns.length,
-                      itemBuilder: (context, index) {
-                        final item = _checkIns[index];
-                        return ListTile(
-                          leading: Icon(Icons.location_on),
-                          title: Text(
-                            "Lat: ${item['latitude']}, Lng: ${item['longitude']}",
-                          ),
-                          subtitle: Text(
-                            "Time: ${item['datetime']}\nBattery: ${item['battery']}%\nSpeed: ${item['speed']}",
-                          ),
-                        );
-                      },
-                    ),
+              child:
+                  _checkIns.isEmpty
+                      ? Center(child: Text("No check-in data yet."))
+                      : ListView.builder(
+                        itemCount: _checkIns.length,
+                        itemBuilder: (context, index) {
+                          final item = _checkIns[index];
+                          return ListTile(
+                            leading: Icon(Icons.location_on),
+                            title: Text(
+                              "Lat: ${item['latitude']}, Lng: ${item['longitude']}",
+                            ),
+                            subtitle: Text(
+                              "Time: ${item['datetime']}\nBattery: ${item['battery']}%\nSpeed: ${item['speed']}",
+                            ),
+                          );
+                        },
+                      ),
             ),
           ],
         ),

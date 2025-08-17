@@ -64,4 +64,19 @@ class DBHelper {
     final db = await database;
     return await db.query('checkins', orderBy: 'id DESC');
   }
+
+   static Future<int> insertRoute(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert('route', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllRoutes({int? limit}) async {
+    final db = await database;
+    return await db.query('route', orderBy: 'id DESC', limit: limit);
+  }
+
+  static Future<void> deleteRoutes() async {
+    final db = await database;
+    await db.delete('route');
+  }
 }
