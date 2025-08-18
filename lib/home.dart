@@ -32,7 +32,7 @@ class _CheckInPageState extends State<CheckInPage> {
     // _loadCheckIns();
     _checkPermissions();
     //
-    _uiRefreshTimer = Timer.periodic(Duration(minutes: 1), (_) {
+    _uiRefreshTimer = Timer.periodic(Duration(seconds: 10), (_) {
       _loadCheckIns();
     });
   }
@@ -52,7 +52,7 @@ class _CheckInPageState extends State<CheckInPage> {
   }
 
   Future<void> _loadCheckIns() async {
-    final data = await DBHelper.getAllCheckIns();
+    final data = await DBHelper.getAllRoutes(limit: 10);
 
     if (data.isNotEmpty) {
       final latest = data.first;

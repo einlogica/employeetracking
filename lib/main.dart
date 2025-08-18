@@ -31,18 +31,38 @@ Future<void> initializeService() async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   print("Executing Background Service");
-  DartPluginRegistrant.ensureInitialized();
+  // DartPluginRegistrant.ensureInitialized();
   final battery = Battery();
   int minuteCounter = 0;
   Position? _lastPosition;
   bool start = true;
   DateTime _lastDateTime = DateTime.now();
 
+
+  int distanceGap = 0;
+  Duration timeGap = Duration(seconds: 10);
+
+
   service.on('stopService').listen((event) {
     service.stopSelf();
   });
 
-  Timer.periodic(const Duration(minutes: 1), (timer) async {
+
+  _lastPosition = await Geolocator.getCurrentPosition();
+  final batteryLevel = await battery.batteryLevel;
+  final now = DateTime.now();
+
+  await DBHelper.insertCheckIn({
+    'datetime': now.toIso8601String(),
+    'battery': batteryLevel,
+    'latitude': _lastPosition.latitude,
+    'longitude': _lastPosition.longitude,
+  });
+
+  print("✅ Auto Check-In stored: $now");
+
+  Timer.periodic(timeGap, (timer) async {
+    print("..");
     if (service is AndroidServiceInstance) {
       if (!(await service.isForegroundService())) {
         return;
@@ -60,6 +80,7 @@ void onStart(ServiceInstance service) async {
       final now = DateTime.now();
 
       if (_lastPosition != null) {
+        print("==========");
         double distance = Geolocator.distanceBetween(
           _lastPosition!.latitude,
           _lastPosition!.longitude,
@@ -67,7 +88,7 @@ void onStart(ServiceInstance service) async {
           position.longitude,
         );
 
-        if (distance >= 30 ||
+        if (distance >= distanceGap ||
             start ||
             now.difference(_lastDateTime) > Duration(minutes: 15)) {
           final batteryLevel = await battery.batteryLevel;
