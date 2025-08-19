@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:employer/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -10,7 +9,7 @@ import 'package:battery_plus/battery_plus.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeService();
-  runApp(MaterialApp(home: CheckInPage()));
+  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: CheckInPage()));
 }
 
 Future<void> initializeService() async {
@@ -38,15 +37,12 @@ void onStart(ServiceInstance service) async {
   bool start = true;
   DateTime _lastDateTime = DateTime.now();
 
-
   int distanceGap = 0;
   Duration timeGap = Duration(seconds: 10);
-
 
   service.on('stopService').listen((event) {
     service.stopSelf();
   });
-
 
   _lastPosition = await Geolocator.getCurrentPosition();
   final batteryLevel = await battery.batteryLevel;
@@ -153,18 +149,19 @@ void onStart(ServiceInstance service) async {
 
             // Reset counter
             minuteCounter = 0;
-          
-        
-        print("✅ Auto Check-In stored: $now");
-        start = false;
-      } else {
-        print("🛑 Skipped: moved only ${distance.toStringAsFixed(1)} meters");
-        return; // don't save
+
+            print("✅ Auto Check-In stored: $now");
+            start = false;
+          } else {
+            print(
+              "🛑 Skipped: moved only ${distance.toStringAsFixed(1)} meters",
+            );
+            return; // don't save
+          }
+        }
       }
-   
-  }
-}
-}  catch (e) {
+    } catch (e) {
       print("❌ Background Check-In Error: $e");
-    }});
+    }
+  });
 }

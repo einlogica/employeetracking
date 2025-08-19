@@ -23,17 +23,19 @@ class _CheckInPageState extends State<CheckInPage> {
   String _timeText = "Not yet checked in";
 
   List<Map<String, dynamic>> _checkIns = [];
+  List<Map<String, dynamic>> routes = [];
 
   Timer? _uiRefreshTimer;
   @override
   void initState() {
     super.initState();
-    // _startService();
-    // _loadCheckIns();
-    _checkPermissions();
-    //
-    _uiRefreshTimer = Timer.periodic(Duration(seconds: 10), (_) {
-      _loadCheckIns();
+    _loadRoutes();
+  }
+
+  Future<void> _loadRoutes() async {
+    final data = await DBHelper.getAllRoutes();
+    setState(() {
+      routes = data;
     });
   }
 
@@ -110,6 +112,7 @@ class _CheckInPageState extends State<CheckInPage> {
                   ElevatedButton(
                     onPressed: () async {
                       _startService();
+                      _loadRoutes();
                     },
 
                     child: Text('Check In', style: TextStyle(fontSize: 20)),
@@ -143,26 +146,33 @@ class _CheckInPageState extends State<CheckInPage> {
             //   textAlign: TextAlign.center,
             // ),
             Divider(),
-            Expanded(
-              child:
-                  _checkIns.isEmpty
-                      ? Center(child: Text("No check-in data yet."))
-                      : ListView.builder(
-                        itemCount: _checkIns.length,
-                        itemBuilder: (context, index) {
-                          final item = _checkIns[index];
-                          return ListTile(
-                            leading: Icon(Icons.location_on),
-                            title: Text(
-                              "Lat: ${item['latitude']}, Lng: ${item['longitude']}",
-                            ),
-                            subtitle: Text(
-                              "Time: ${item['datetime']}\nBattery: ${item['battery']}%\nSpeed: ${item['speed']}",
-                            ),
-                          );
-                        },
-                      ),
-            ),
+          Expanded(
+  child: routes.isEmpty
+      ? const Center(child: Text("No 15-minute summary data yet."))
+      : ListView.builder(
+          itemCount: routes.length,
+          itemBuilder: (context, index) {
+            final r = routes[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+              child: ListTile(
+                leading: const Icon(Icons.route),
+                title: Text(
+                  "Start: ${r['start_time']}\nEnd: ${r['end_time']}",
+                  style: const TextStyle(fontSize: 14),
+                ),
+                subtitle: Text(
+                  // "Route ${r['id']}\n"
+                  "Battery: ${r['battery']}%\n"
+                  "Distance: ${r['distance'].toStringAsFixed(1)} m\n"
+                  "Speed: ${r['speed'].toStringAsFixed(1)} km/h\n"
+                  ),
+              ),
+            );
+          },
+        ),
+),
+
           ],
         ),
       ),
