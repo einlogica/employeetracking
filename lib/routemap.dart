@@ -76,7 +76,7 @@ class _RouteMapPageState extends State<RouteMapPage> {
                       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.example.employer',
                     ),
-                    // Polyline of the OSRM route
+                   
                     if (_routePoints.isNotEmpty)
                       PolylineLayer(polylines: [
                         Polyline(points: _routePoints, strokeWidth: 4),
