@@ -1,8 +1,9 @@
-// ignore_for_file: library_private_types_in_public_api, unused_field
+// ignore_for_file: library_private_types_in_public_api, unused_field, unused_element
 
 import 'dart:async';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:employer/database_helper.dart';
+import 'package:employer/routemap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -153,22 +154,30 @@ class _CheckInPageState extends State<CheckInPage> {
           itemCount: routes.length,
           itemBuilder: (context, index) {
             final r = routes[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-              child: ListTile(
-                leading: const Icon(Icons.route),
-                title: Text(
-                  "Start: ${r['start_time']}\nEnd: ${r['end_time']}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-                subtitle: Text(
-                  // "Route ${r['id']}\n"
-                  "Battery: ${r['battery']}%\n"
-                  "Distance: ${r['distance'].toStringAsFixed(1)} m\n"
-                  "Speed: ${r['speed'].toStringAsFixed(1)} km/h\n"
-                  ),
-              ),
-            );
+         return Card(
+  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+  child: ListTile(
+    leading: const Icon(Icons.route),
+    title: Text(
+      "Start: ${r['start_time']}\nEnd: ${r['end_time']}",
+      style: const TextStyle(fontSize: 14),
+    ),
+    subtitle: Text(
+      "Battery: ${r['battery']}%  |  "
+      "Dist: ${((r['distance'] ?? 0.0) as num).toStringAsFixed(1)} m  |  "
+      "Speed: ${((r['speed'] ?? 0.0) as num).toStringAsFixed(1)} km/h  |  "
+      "Status: ${r['status'] == 1 ? "Moving" : "Static"}",
+    ),
+    onTap: () {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RouteMapPage(routeRow: r),
+        ),
+      );
+    },
+  ),
+);
+
           },
         ),
 ),
