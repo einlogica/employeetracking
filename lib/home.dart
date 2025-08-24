@@ -171,7 +171,7 @@ class _CheckInPageState extends State<CheckInPage> {
     onTap: () {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => RouteMapPage(routeRow: r),
+          builder: (_) => RouteMapPage(routeRow: r, startLat: 0, startLng:0, endLat: 0, endLng: 0,),
         ),
       );
     },

@@ -143,7 +143,7 @@ void onStart(ServiceInstance service) async {
                   "Route ${r['id']} | Status: ${r['status']} | "
                   "Start: ${r['start_time']} | End: ${r['end_time']} | "
                   "Battery: ${r['battery']} | Dist: ${r['distance']} | Speed: ${r['speed']}",
-                );
+                ); 
               }
             }
 
